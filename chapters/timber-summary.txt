@@ -1,0 +1,2 @@
+There are 100 trees on "The North Slope".
+They are: '((45 REDWOOD) (12 OAK) (43 MAPLE))
