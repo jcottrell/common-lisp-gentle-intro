@@ -1,93 +1,21 @@
-;;; Assignment
-;
-
-(setf *total-glasses* 0)
-
-(defun sell (number-of-sold-glasses-this-round)
-  "Ye Olde Lemonade Stand: Sales by the Glass."
-  (setf *total-glasses* (+ *total-glasses* number-of-sold-glasses-this-round))
-  (format t
-          "~&That makes ~S glasses so far today."
-          *total-glasses*))
-
-;;; 10.1
-; Guess:  We would get an error if we didn't set *total-glasses* before calling
-;         sell.
-; Actual: There was an error that sent us to the debugger because
-;         "*total-glasses* is unbound.". I was able to add a value at the
-;         debugger (zero) so it worked afterward.
-; Guess:  We would get an error about adding a number to a symbol.
-; Actual: There was an error that sent us to the debugger because the value 'foo
-;         is not of type NUMBER.
-
-;;; 10.2
-(defun sell-ink (newly-sold-glasses)
-  (progn (incf *total-glasses* newly-sold-glasses)
-         (format t
-                 "~&That makes ~S glasses so far today."
-                 *total-glasses*)))
-
-;;; 10.3
-(setf *friends* '())
-(setf *previously-met* 0)
-
-(defun meet (person)
-  (cond ((member person *friends*)
-         (progn (incf *previously-met*)
-                (cond ((equal person (first *friends*))
-                       'we-just-met)
-                      (t 'we-know-each-other))))
-        (t (progn (push person *friends*)
-                  'pleased-to-meet-you))))
-;(meet 'fred); 'pleased-to-meet-you
-;(meet 'cindy); 'pleased-to-meet-you
-;(meet 'cindy); 'we-just-met
-;(meet 'joe); 'pleased-to-meet-you
-;(meet 'fred); 'we-know-each-other
-;*friends*; '(joe cindy fred)
-;*previously-met*; 2
-
-;;; 10.4
-(defun forget (person)
-  (cond ((member person *friends*)
-         (progn (setf *friends* (remove-if #'(lambda (friend) (equal friend person))
-                                           *friends*))
-                'i-no-longer-remember-that-person))
-        (t 'how-can-i-forget-someone-i-have-not-met)))
-
-;;; 10.5
-(defun ugly (x y)
-  (let* ((larger (max x y))
-         (avg (/ (+ x y) 2.0))
-         (pct (* 100 (/ avg larger))))
-    (list 'average avg 'is
-          pct 'percent 'of 'max larger)))
-;(ugly 20 2)
-
-;;; 10.6
-;(setf x nil)
-;(push x x); '(((NIL) NIL) (NIL) NIL)
-
-;;; 10.7
-; Length isn't a position within x so it can't be set.
-
-;;; Toolkit: BREAK and ERROR
-(defun analyze-profit (price commission-rate)
-  (let* ((commission (* price commission-rate))
-         (result (cond ((> commission 100) 'rich)
-                       ((< commission 100) 'poor))))
-    (break "Value of RESULT is ~S and COMMISSION is ~S" result commission)
-    (format t "~&I predict you will be ~S on a commission of ~A" result commission)
-    result))
-;(analyze-profit 2000 0.05)
-
-;;; 10.8
 ;;; Tic-Tac-Toe
+;;;
+;;; Run at the terminal with:
+;;; sbcl --script chapters/tic-tac-toe.lisp
+
+(defparameter *computer* 10)
+(defparameter *opponent* 1)
+
+(defparameter *triplets*
+      '((1 2 3) (4 5 6) (7 8 9) ; horizontal
+        (1 4 7) (2 5 8) (3 6 9) ; vertical
+        (1 5 9) (3 5 7))) ; diagonal
+(defparameter *corners* '(1 3 7 9))
+(defparameter *sides* '(2 4 6 8))
+(defparameter *diagonals* '((1 5 9) (3 5 7)))
 
 (defun make-board ()
   (list 'board 0 0 0 0 0 0 0 0 0))
-
-;(setf b (make-board))
 
 (defun convert-to-letter (position-value)
   (cond ((equal position-value 1) "O")
@@ -110,23 +38,10 @@
   (print-row
    (nth 7 board) (nth 8 board) (nth 9 board))
   (finish-output))
-;(print-board b)
 
 (defun make-move (player pos board)
   (setf (nth pos board) player)
   board)
-
-(setf *computer* 10)
-(setf *opponent* 1)
-
-;(make-move *opponent* 3 b)
-;(make-move *computer* 5 b)
-;(print-board b)
-
-(setf *triplets*
-      '((1 2 3) (4 5 6) (7 8 9) ; horizontal
-        (1 4 7) (2 5 8) (3 6 9) ; vertical
-        (1 5 9) (3 5 7))) ; diagonal
 
 (defun sum-triplet (board triplet)
   (+ (nth (first triplet) board)
@@ -140,7 +55,6 @@
   (mapcar #'(lambda (triplet)
               (sum-triplet board triplet))
           *triplets*))
-;(compute-sums b); '(1 10 0 0 10 1 10 11)
 
 (defun winner-p (board)
   (let ((sums (compute-sums board)))
@@ -198,9 +112,6 @@
            (format t "~&Tie game."))
           (t (opponent-move new-board)))))
 
-(defun choose-best-move (board)
-  (random-move-strategy board))
-
 (defun random-move-strategy (board)
   (list (pick-random-empty-position board)
         "random move"))
@@ -236,20 +147,6 @@
                (zerop (nth pos board)))
            squares))
 
-(defun choose-best-move (board)
-  (or (make-three-in-a-row board)
-      (block-opponent-win board)
-      (block-squeeze-play board)
-      (random-move-strategy board)))
-
-;;; a.
-(setf *corners* '(1 3 7 9))
-(setf *sides* '(2 4 6 8))
-;(find-empty-position b *sides*)
-
-;;; b.
-(setf *diagonals* '((1 5 9) (3 5 7)))
-
 (defun block-squeeze-play (board)
   (let ((possible-squeeze (find-if #'(lambda (diagonal)
                                        (equalp (list (nth (first diagonal) board)
@@ -263,7 +160,6 @@
 ;(block-squeeze-play '(board 1 0 0 0 10 0 0 0 1)); '(2 "block squeeze play")
 ;(block-squeeze-play '(board 0 0 1 0 10 0 1 0 0)); '(2 "block squeeze play")
 
-;;; c.
 (defun block-two-on-one (board)
   (let ((possible (find-if #'(lambda (diagonal)
                                (or (equalp (list (nth (first diagonal) board)
@@ -281,21 +177,8 @@
           (list corner-move
                 "block two on one"))))))
 
-;;; d.
-(defun choose-best-move (board)
-  (or (make-three-in-a-row board)
-      (block-opponent-win board)
-      (block-squeeze-play board)
-      (block-two-on-one board)
-      (random-move-strategy board)))
+;(block-two-on-one (list 'board *opponent* 0 0 0 *opponent* 0 0 0 *computer*)); '(3 "block two on one")
 
-;(block-two-on-one
-; (list 'board
-;       *opponent* 0          0
-;       0          *opponent* 0
-;       0          0          *computer*)); '(3 "block two on one")
-
-;;; e.
 (defun make-squeeze-play (board)
   (let* ((target-total (+ *computer* *opponent*))
          (possible (find-if #'(lambda (diagonal)
@@ -334,30 +217,4 @@
       (make-two-on-one board)
       (random-move-strategy board)))
 
-;(computer-move '(board 10 10 1 1 1 10 10 0 1))
-;(choose-best-move '(board 10 10 1 1 1 10 10 0 1))
-;
-;(make-three-in-a-row '(board 10 10 1 1 1 10 10 0 1)); nil
-;(block-opponent-win '(board 10 10 1 1 1 10 10 0 1)); nil
-;(block-squeeze-play '(board 10 10 1 1 1 10 10 0 1)); nil
-;(block-two-on-one '(board 10 10 1 1 1 10 10 0 1)); nil
-;(make-squeeze-play '(board 10 10 1 1 1 10 10 0 1)); nil
-;(make-two-on-one '(board 10 10 1 1 1 10 10 0 1)); nil
-;(random-move-strategy '(board 10 10 1 1 1 10 10 0 1)); '(8 "random move")
-
-;;; 10.9
-(defun chop (whole)
-  (setf (cdr whole) '()))
-;(setf *whole* '(fee fie foe fum))
-;(chop *whole*); NIL; whole is also '(fee)
-
-;;; 10.10
-(defun ntack (starting to-tack)
-  (setf (cdr (last starting)) (cons to-tack '())))
-
-;;; 10.11
-;'(a b c a b c ...)
-
-;;; 10.12
-; The first gives you a new appended list of four.
-; The second gives you infinite recursion.
+(play-one-game)
