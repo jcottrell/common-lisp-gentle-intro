@@ -91,9 +91,15 @@
 
 ;; Need to define *nodes* and *arcs* before these macro calls otherwise I get
 ;; errors (warnings?) like The variable *nodes* is unbound.
-;; 1. Run all the defvar lines above.
-;; 2. (initialize)
-;; 3. Run the commented-out lines below.
+;; 1. Evaluate the buffer
+;; 2. Run all the defvar lines above.
+;; 3. (initialize)
+;; 4. Run the commented-out lines below.
+;; 5. In the repl, run (finite-state-machine)
+;; 6. Enter input like nickel, dime, quarter, coin-return, gum-button,
+;; mint-button, chocolate-button
+;;
+;; Gum is 15, mints are 20, chocolate is 25
 
 ;(initialize)
 
@@ -103,27 +109,41 @@
 ;(defnode have-10)
 ;(defnode have-15)
 ;(defnode have-20)
+;(defnode have-25); 14.7
 ;(defnode end)
 ;
 ;(defarc start nickel have-5 "Clunk!")
 ;(defarc start dime have-10 "Clink!")
+;(defarc start quarter have-25 "Ker-chunk!"); 14.7
 ;(defarc start coin-return start "Nothing to return.")
 ;
 ;(defarc have-5 nickel have-10 "Clunk!")
 ;(defarc have-5 dime have-15 "Clink!")
+;(defarc have-5 quarter have-25 "Nickel change."); 14.7
 ;(defarc have-5 coin-return start "Returned five cents.")
 ;
 ;(defarc have-10 nickel have-15 "Clunk!")
 ;(defarc have-10 dime have-20 "Clink!")
+;(defarc have-10 quarter have-25 "Dime change."); 14.7
 ;(defarc have-10 coin-return start "Returned ten cents.")
 ;
 ;(defarc have-15 nickel have-20 "Clunk!")
-;(defarc have-15 dime have-20 "Nickel change.")
+;(defarc have-15 dime have-25 "Clink!"); 14.7
+;(defarc have-15 quarter have-25 "Dime and nickel change."); 14.7
 ;(defarc have-15 gum-button end "Deliver gum.")
 ;(defarc have-15 coin-return start "Returned fifteen cents.")
 ;
-;(defarc have-20 nickel have-20 "Nickel returned.")
-;(defarc have-20 dime have-20 "Dime returned.")
+;(defarc have-20 nickel have-25 "Clunk!"); 14.7
+;(defarc have-20 dime have-25 "Nickel returned."); 14.7
 ;(defarc have-20 gum-button end "Deliver gum, nickel change.")
 ;(defarc have-20 mint-button end "Deliver mints.")
 ;(defarc have-20 coin-return start "Returned twenty cents.")
+;
+; 14.7 (more)
+;(defarc have-25 nickel have-25 "Nickel returned.")
+;(defarc have-25 dime have-25 "Dime returned.")
+;(defarc have-25 quarter have-25 "Quarter returned.")
+;(defarc have-25 gum-button end "Deliver gum, dime change.")
+;(defarc have-25 mint-button end "Deliver mints, nickel change.")
+;(defarc have-25 chocolate-button end "Deliver chocolate bar.")
+;(defarc have-25 coin-return start "Returned twenty-five cents.")
